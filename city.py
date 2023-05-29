@@ -17,6 +17,8 @@ class CityResult:
         self._currency = currency
         self._date_arrived = None
         self._date_leave = None
+        self._distance = []
+        self._images = []
 
     @property
     def id_location(self) -> str:
@@ -90,6 +92,22 @@ class CityResult:
     def date_leave(self, value: datetime.datetime) -> None:
         self._date_leave = value
 
+    @property
+    def distance(self):
+        return self._distance
+
+    @distance.setter
+    def distance(self, value: List) -> None:
+        self._distance.extend(value)
+
+    @property
+    def images(self):
+        return self._images
+
+    @distance.setter
+    def images(self, value) -> None:
+        self._images.append(value)
+
     def clear_hotel_list(self):
         self._town = None
         self._id_location = None
@@ -100,6 +118,8 @@ class CityResult:
         self._currency = 'USD'
         self._date_arrived = None
         self._date_leave = None
+        self._distance.clear()
+        self._images = []
 
 
 city = CityResult()

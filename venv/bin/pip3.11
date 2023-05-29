@@ -1,4 +1,4 @@
-#!/Users/nn/Downloads/project/venv/bin/python3.11
+#!/Users/nn/Downloads/project-bot-2/venv/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys

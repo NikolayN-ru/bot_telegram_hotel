@@ -4,14 +4,12 @@ import datetime
 import telebot
 import os
 import re
-import logging
 from request_data import Request
-import json
 from telebot_calendar import Calendar, CallbackData, RUSSIAN_LANGUAGE
 from api import *
 from city import city
 from environs import Env
-
+from datetime import date as DATETIME
 
 env = Env()
 env.read_env()
@@ -25,7 +23,6 @@ calendar_1_callback = CallbackData("calendar_1", "action", "year", "month", "day
 calendar_2_callback = CallbackData("calendar_2", "action", "year", "month", "day")
 town_name = ''
 
-
 def markup_yes_no() -> 'telebot.types.InlineKeyboardMarkup':
     mrk = telebot.types.InlineKeyboardMarkup(row_width=2)
     button1 = telebot.types.InlineKeyboardButton("да", callback_data='1yes1')
@@ -33,14 +30,11 @@ def markup_yes_no() -> 'telebot.types.InlineKeyboardMarkup':
     mrk.add(button1, button2)
     return mrk
 
-
 @bot.message_handler(commands=['start'])
 def send_welcome(message: 'telebot.types.Message') -> None:
-    print(type(message))
     bot.send_message(message.from_user.id, 'Будь как дома, Путник! '
                                            'Сегодня я помогу тебе с поиском ночлега. '
                                            'Чтобы просмотреть доступные функции, нажми /help.')
-
 
 @bot.message_handler(commands=['help'])
 def send_help(message) -> None:
@@ -49,7 +43,6 @@ def send_help(message) -> None:
                                            '/highprice - поиск отелей по высоким ценам;\n'
                                            '/bestdeal - поиск отелей, подходящих по цене и расположению от центра;\n'
                                            '/history - вывести историю поиска')
-
 
 @bot.message_handler(commands=['history'])
 def send_history(message) -> None:
@@ -78,7 +71,6 @@ def send_history(message) -> None:
         bot.send_message(message.from_user.id, 'Ты пока еще ничего не искал. '
                                                'Введи команду, или /help для вывода доступных команд')
 
-
 @bot.message_handler(content_types=['text', 'voice'])
 def get_text_messages(message) -> None:
     logger.info(f'User {message.from_user.id} write the message {message.text}')
@@ -96,7 +88,6 @@ def get_text_messages(message) -> None:
         bot.send_message(message.from_user.id, "Я тебя не понимаю. Повтори или напиши "
                                                "/help для просмотра доступных команд.")
 
-
 @bot.callback_query_handler(func=lambda call: call.data in history_dict.keys())
 def history_show(call) -> None:
     bot.send_message(call.message.chat.id, call.data)
@@ -106,7 +97,6 @@ def history_show(call) -> None:
         for line in history_dict[call.data]:
             bot.send_message(call.message.chat.id, line)
     bot.send_message(call.message.chat.id, 'Чем я еще могу помочь? (/help для вывода доступных команд)')
-
 
 def choice_town(message) -> None:
     try:
@@ -120,13 +110,10 @@ def choice_town(message) -> None:
             button_list = list()
             for location in list_town:
                 display_name = location[1]
-
                 call_data = '<delimiter>'.join((location[1].split()[0], location[0]))
-
                 button_list.append(telebot.types.InlineKeyboardButton(text=display_name,
                                                                       callback_data=call_data))
             keyboard.add(*button_list)
-
             bot.send_message(message.from_user.id, "Выбери из списка нужный тебе город:",
                              reply_markup=keyboard)
     except Exception as err_town:
@@ -134,7 +121,6 @@ def choice_town(message) -> None:
         bot.send_message(message.from_user.id, 'Произошла непредвиденная ошибка. Возможно, сервис сейчас недоступен. '
                                                'Пожалуйста, повтори запрос немного позже.')
         city.clear_hotel_list()
-
 
 @bot.callback_query_handler(func=lambda call: call.data.count('<delimiter>') > 0)
 def choose_dates(call) -> None:
@@ -146,7 +132,6 @@ def choose_dates(call) -> None:
     bot.send_message(call.message.chat.id, f"Выбери дату ЗАЕЗДА:",
                      reply_markup=calendar.create_calendar(name=calendar_1_callback.prefix,
                                                            year=now.year, month=now.month))
-
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(calendar_1_callback.prefix))
 def date_arrived(call: telebot.types.CallbackQuery) -> None:
@@ -168,7 +153,6 @@ def date_arrived(call: telebot.types.CallbackQuery) -> None:
     elif action == "CANCEL":
         bot.send_message(call.message.chat.id, 'Запрос был отменен. Введи /help для вывода доступных команд')
         city.clear_hotel_list()
-
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(calendar_2_callback.prefix))
 def date_leave(call: telebot.types.CallbackQuery) -> None:
@@ -192,7 +176,6 @@ def date_leave(call: telebot.types.CallbackQuery) -> None:
         bot.send_message(call.message.chat.id, 'Запрос был отменен. Введи /help для вывода доступных команд.')
         city.clear_hotel_list()
 
-
 def choice_currency(message) -> None:
     try:
         if int(message.text):
@@ -213,7 +196,6 @@ def choice_currency(message) -> None:
         bot.send_message(message.from_user.id, "Я тебя не понимаю. Введи пожалуйста число:")
         bot.register_next_step_handler(message, choice_currency)
 
-
 def input_prices(message) -> None:
     try:
         if message.text not in currency.keys():
@@ -229,7 +211,6 @@ def input_prices(message) -> None:
         logger.critical(f'From User {message.from_user.id}: {message.text} - {error}')
         bot.send_message(message.from_user.id, "Непредвиденная ошибка. Повтори запрос сначала.")
         city.clear_hotel_list()
-
 
 def input_distance(message) -> None:
     try:
@@ -247,14 +228,13 @@ def input_distance(message) -> None:
         logger.critical(f'From User {message.from_user.id}: {message.text} - {error}')
         bot.send_message(message.from_user.id, "Непредвиденная ошибка. Повтори запрос сначала.")
 
-
 def show_results(message) -> None:
     if city.mode_search == 'DISTANCE_FROM_LANDMARK':
         distance_limit = set_limits(message.text.replace(',', '.'))
-
         if distance_limit:
             bot.send_message(message.from_user.id, 'Обрабатываю запрос, пожалуйста, подожди...')
-            best_deal(city, distance_limit)
+            city.distance = distance_limit
+            get_hotels(Request, city.name_town)
         else:
             logger.error(f'From User {message.from_user.id}: {message.text} - {ValueError}')
             bot.send_message(message.from_user.id, f'Я тебя не понимаю. '
@@ -271,11 +251,8 @@ def show_results(message) -> None:
             city.currency = message.text
             bot.send_message(message.from_user.id, 'Обрабатываю запрос, пожалуйста, подожди...',
                              reply_markup=keyboard)
-            print('meow', city.name_town)
             get_hotels(Request, city.name_town)
-            print('meow1', get_hotels(Request, city.name_town))
 
-            #сюда код доходит, но тут ошибка с параметрами для get_hotels
     if distance_limit:
         if len(city.all_hotels) == 0:
             logger.info('Nothing found for request')
@@ -286,13 +263,25 @@ def show_results(message) -> None:
             n = 1
             logger.info('Request was already successful')
             for hotel in city.all_hotels:
-                bot.send_message(message.from_user.id, ''.join([str(n), '. ', str(hotel)]))
-                history(f'User' + str(message.from_user.id) + '.txt', ''.join(['\n', str(n), '. ', str(hotel)]))
+                year_in, month_in, day_in = map(int, city.date_arrived.split("-"))
+                year_out, month_out, day_out = map(int, city.date_leave.split("-"))
+                date1 = DATETIME(year_in, month_in, day_in)
+                date2 = DATETIME(year_out, month_out, day_out)
+                delta = date2 - date1
+                num_days = delta.days
+                price_without_dollar = hotel["price"].replace('$', '')
+                bot.send_message(message.from_user.id, f"{''.join([str(n), '. ', str(hotel['name'])])}\n"
+                    f'Период пребывания: с {city.date_arrived} - по {city.date_leave}.\n'
+                    f'стоимость за сутки: {hotel["price"]}\n'
+                    f'количество дней: {num_days}\n'
+                    f'общая стоимость: ${int(price_without_dollar)*int(num_days)}\n'
+                    f'рейтиг отеля ⭐ {hotel["stars"]}\n'
+                    f'дистанция {hotel["distance"]} km')
+                history(f'User' + str(message.from_user.id) + '.txt', ''.join(['\n', str(n), '. ', str(hotel['name'])]))
                 n += 1
             else:
                 bot.send_message(message.from_user.id, 'Хотешь взглянуть на фотографии отелей?',
                                  reply_markup=markup_yes_no())
-
 
 @bot.callback_query_handler(func=lambda call: call.data in ('1yes1', '2no2'))
 def photo_hotels(call) -> None:
@@ -305,7 +294,6 @@ def photo_hotels(call) -> None:
     bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id,
                                   reply_markup=None)
 
-
 def number_of_photos(message) -> None:
     if message.text.isdigit():
         if int(message.text) not in range(1, 8):
@@ -317,7 +305,7 @@ def number_of_photos(message) -> None:
             keyboard = telebot.types.InlineKeyboardMarkup(row_width=1)
             button_list = list()
             for item in city.all_hotels:
-                button_list.append(telebot.types.InlineKeyboardButton(text=str(item.name),
+                button_list.append(telebot.types.InlineKeyboardButton(text=str(item['name']),
                                                     callback_data='<ph0t0>'.join(str([city.all_hotels.index(item)]))))
             keyboard.add(*button_list)
             bot.send_message(message.from_user.id, "Фотографии какого отеля показать?:",
@@ -326,33 +314,30 @@ def number_of_photos(message) -> None:
         bot.send_message(message.from_user.id, 'Я тебя не понимаю. Необходимо ввести число от 1 до 7!')
         bot.register_next_step_handler(message, number_of_photos)
 
-
 @bot.callback_query_handler(func=lambda call: call.data.count('<ph0t0>') > 0)
 def show_photo(call) -> None:
     index = int(call.data.split('<ph0t0>')[1])
-    bot.send_message(call.message.chat.id, city.all_hotels[index].name)
+    bot.send_message(call.message.chat.id, city.all_hotels[index]['name'])
     bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id,
                                   reply_markup=None)
     try:
         bot.send_message(call.message.chat.id, 'Загружаю фотографии, пожалуйста, подожди...')
-        show_photos(city.all_hotels[index], city.num_result)
-        for item in city.all_hotels[index].url_photo:
-            file = requests.get(item)
+        images = show_photos(hotel=city.all_hotels[index], number=city.num_result)
+        for i in images['images']:
+            file = requests.get(i)
             img = 'img.jpg'
             with open(img, 'wb') as f:
                 f.write(file.content)
             with open('img.jpg', 'rb') as img:
-                bot.send_photo(call.message.chat.id, img, f'{city.all_hotels[index].name}')
+                bot.send_photo(call.message.chat.id, img, '')
             os.remove('img.jpg')
-        else:
-            bot.send_message(call.message.chat.id, 'Хочешь посмотреть фотографии по другому отелю?',
-                             reply_markup=markup_yes_no())
+        bot.send_message(call.message.chat.id, f'{city.all_hotels[index]["name"]}')
+        bot.send_message(call.message.chat.id, 'Хочешь посмотреть фотографии по другому отелю?', reply_markup=markup_yes_no())
     except Exception as photo_err:
         logger.error(photo_err)
         bot.send_message(call.message.chat.id, "Фотографий по данному отелю не найдено. "
                                                "Хотишь посмотреть фотографии по другому отелю?",
                                                reply_markup=markup_yes_no())
-
 
 if __name__ == "__main__":
     bot.polling(none_stop=True, interval=0)
