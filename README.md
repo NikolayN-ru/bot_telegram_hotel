@@ -1,6 +1,5 @@
-(img src="https://github.com/NikolayN-ru/bot_telegram_hotel/raw/main/assets/1.jpg" width="300")
-(img src="https://github.com/NikolayN-ru/bot_telegram_hotel/raw/main/assets/2.jpg" width="300")
-[<img src="https://github.com/NikolayN-ru/bot_telegram_hotel/blob/main/assets/2.jpg" width="300" />](https://github.com/NikolayN-ru/task-8-magazine)
+[<img src="https://github.com/NikolayN-ru/bot_telegram_hotel/blob/main/assets/1.jpg" width="300" />]
+[<img src="https://github.com/NikolayN-ru/bot_telegram_hotel/blob/main/assets/2.jpg" width="300" />]
 # Описание проекта
 
 Проект представляет собой Telegram-бот, который работает с открытым API Hotels для поиска информации о гостиницах в разных городах.
